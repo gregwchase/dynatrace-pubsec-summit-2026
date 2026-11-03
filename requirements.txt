@@ -1,0 +1,16 @@
+# Arize AX SDK, OTel registration, and evals
+arize>=8.56.0,<9
+arize-otel>=0.13.0
+arize-phoenix-evals>=3.3.0,<4
+
+# The agent framework + OpenInference auto-instrumentation for it
+openai-agents>=0.6.3   # pulls in a compatible openai client
+openinference-instrumentation-openai-agents>=1.6.1
+openinference-semantic-conventions>=0.1.41
+
+# Notebook conveniences
+pandas>=2.0
+python-dotenv>=1.0
+tqdm
+jinja2
+matplotlib   # for DataFrame.style gradients
