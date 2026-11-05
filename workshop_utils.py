@@ -269,7 +269,23 @@ def root_spans(spans: pd.DataFrame) -> pd.DataFrame:
         roots[key] = meta.apply(lambda m, k=key: m.get(k))
 
     roots = roots.rename(columns={INPUT: "input", OUTPUT: "output", **_canonical_eval_columns(roots.columns)})
-    return roots.reset_index(drop=True)
+    return _merge_online_eval_columns(roots).reset_index(drop=True)
+
+
+def _merge_online_eval_columns(roots: pd.DataFrame) -> pd.DataFrame:
+    """Copy this participant's online results (``eval.hallucination_<handle>.*``) into the
+    standard ``eval.hallucination.*`` columns wherever the notebook didn't score that trace,
+    so later cells can read one set of columns. The online columns are kept too."""
+    try:
+        suffix = "_" + _eval_suffix()
+    except KeyError:
+        return roots
+    pattern = re.compile(rf"^eval\.(.+){re.escape(suffix)}\.(label|score|explanation)$")
+    for col in list(roots.columns):
+        if m := pattern.match(col):
+            canonical = f"eval.{m.group(1)}.{m.group(2)}"
+            roots[canonical] = roots[canonical].combine_first(roots[col]) if canonical in roots else roots[col]
+    return roots
 
 
 _EVAL_COL = re.compile(r"^evals?[._](.+?)[._](label|score|explanation)$", re.IGNORECASE)
@@ -334,6 +350,20 @@ def participant_handle() -> str:
 
 
 _ARIZE_PROVIDER = {"openai": "OPEN_AI", "azure": "AZURE_OPEN_AI", "anthropic": "ANTHROPIC", "bedrock": "AWS_BEDROCK"}
+
+
+def _eval_suffix() -> str:
+    return re.sub(r"[^a-z0-9]+", "_", participant_handle().lower()).strip("_") or "anon"
+
+
+def online_eval_name(eval_name: str) -> str:
+    """Result-column name for one of *your* online evaluators, e.g. ``hallucination_jdoe``.
+
+    Arize requires each evaluator's result column to be unique across the whole
+    space, so in a shared workshop space everyone's online evaluators need their
+    own name. ``root_spans()`` merges these back into ``eval.<eval_name>.*``.
+    """
+    return f"{eval_name}_{_eval_suffix()}"
 
 
 def get_or_create_ai_integration(client, name: str | None = None) -> str:
