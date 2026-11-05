@@ -1,0 +1,26 @@
+# Arize AX SDK, OTel registration, and evals
+arize>=8.56.0,<9
+arize-otel>=0.13.0
+arize-phoenix-evals>=3.3.0,<4
+
+# The agent framework + OpenInference auto-instrumentation for it
+langgraph>=1.0
+langchain-core>=1.0
+openinference-instrumentation-langchain>=0.1.80
+websockets>=15,<16         # langgraph-sdk/langsmith import websockets.sync; older envs (e.g. Anaconda) ship 10.x
+brotli>=1.2                # openai's HTTP client decodes Brotli responses with a 1.2+ API ("process() takes no keyword arguments")
+openinference-semantic-conventions>=0.1.41
+
+# Model providers (pick one with LLM_PROVIDER: openai | anthropic | azure | bedrock)
+langchain-openai>=1.0      # OpenAI and Azure OpenAI
+langchain-anthropic>=1.0   # Anthropic
+langchain-aws>=1.0         # Amazon Bedrock
+boto3>=1.39                # Bedrock API keys (AWS_BEARER_TOKEN_BEDROCK)
+
+# Notebook conveniences
+pandas>=2.0
+python-dotenv>=1.0
+tqdm
+jinja2
+matplotlib   # for DataFrame.style gradients
+nest_asyncio  # concurrent evals/experiments inside notebooks
