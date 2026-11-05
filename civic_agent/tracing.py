@@ -1,8 +1,9 @@
 """One-call tracing setup for CivicAssist.
 
 This is the entire integration: register an OpenTelemetry tracer provider
-pointed at Arize, then turn on OpenInference auto-instrumentation for the
-OpenAI Agents SDK. No changes to the agent code are required.
+pointed at Arize, then turn on OpenInference auto-instrumentation for
+LangChain/LangGraph. No changes to the agent code are required, and it works
+the same whichever model provider you use.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ def setup_tracing(project_name: str | None = None, *, verbose: bool = True):
         return _TRACER_PROVIDER
 
     from arize.otel import register
-    from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+    from openinference.instrumentation.langchain import LangChainInstrumentor
 
     tracer_provider = register(
         space_id=os.environ["ARIZE_SPACE_ID"],
@@ -26,9 +27,8 @@ def setup_tracing(project_name: str | None = None, *, verbose: bool = True):
         project_name=project_name or os.environ["ARIZE_PROJECT_NAME"],
         verbose=verbose,
     )
-    # Captures every agent step, LLM call, tool call, guardrail, and handoff.
-    # (exclusive_processor defaults to True, so traces go to Arize only.)
-    OpenAIAgentsInstrumentor().instrument(tracer_provider=tracer_provider)
+    # Captures every graph node, LLM call (with token counts), and tool call.
+    LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
 
     _TRACER_PROVIDER = tracer_provider
     return tracer_provider

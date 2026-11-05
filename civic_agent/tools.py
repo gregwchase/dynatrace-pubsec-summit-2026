@@ -1,6 +1,7 @@
 """Tools the CivicAssist agent can call.
 
-Each tool is a plain Python function wrapped with ``@function_tool``. The
+Each tool is a plain Python function wrapped with LangChain's ``@tool``
+decorator (the docstring becomes the tool description the model sees). The
 OpenInference instrumentor records every call as a TOOL span with its
 arguments and return value, so you can see exactly what the agent asked for
 and what it got back.
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 import json
 
-from agents import function_tool
+from langchain_core.tools import tool
 
 from .knowledge_base import APPLICATIONS, INCOME_LIMITS, OFFICES, PROGRAMS
 
@@ -76,10 +77,11 @@ def find_office_impl(zip_code: str) -> str:
 
 # ---- Agent-facing tool wrappers -------------------------------------------
 
-@function_tool
+@tool(parse_docstring=True)
 def search_programs(query: str) -> str:
-    """Search the official DCS program catalog. Returns program descriptions,
-    eligibility rules, required documents, and a source URL.
+    """Search the official DCS program catalog.
+
+    Returns program descriptions, eligibility rules, required documents, and a source URL.
 
     Args:
         query: Keywords describing the program or need (e.g. "food", "heating bill").
@@ -87,7 +89,7 @@ def search_programs(query: str) -> str:
     return search_programs_impl(query)
 
 
-@function_tool
+@tool(parse_docstring=True)
 def check_eligibility(program_id: str, household_size: int, monthly_income: float) -> str:
     """Run the official income test for a DCS program.
 
@@ -99,7 +101,7 @@ def check_eligibility(program_id: str, household_size: int, monthly_income: floa
     return check_eligibility_impl(program_id, household_size, monthly_income)
 
 
-@function_tool
+@tool(parse_docstring=True)
 def get_application_status(application_id: str) -> str:
     """Look up the status of a submitted application.
 
@@ -109,7 +111,7 @@ def get_application_status(application_id: str) -> str:
     return get_application_status_impl(application_id)
 
 
-@function_tool
+@tool(parse_docstring=True)
 def find_office(zip_code: str) -> str:
     """Find the DCS office that serves a ZIP code, with address, hours, and phone.
 

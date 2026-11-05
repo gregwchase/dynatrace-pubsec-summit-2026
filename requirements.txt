@@ -4,9 +4,16 @@ arize-otel>=0.13.0
 arize-phoenix-evals>=3.3.0,<4
 
 # The agent framework + OpenInference auto-instrumentation for it
-openai-agents>=0.6.3   # pulls in a compatible openai client
-openinference-instrumentation-openai-agents>=1.6.1
+langgraph>=1.0
+langchain-core>=1.0
+openinference-instrumentation-langchain>=0.1.80
 openinference-semantic-conventions>=0.1.41
+
+# Model providers (pick one with LLM_PROVIDER: openai | anthropic | azure | bedrock)
+langchain-openai>=1.0      # OpenAI and Azure OpenAI
+langchain-anthropic>=1.0   # Anthropic
+langchain-aws>=1.0         # Amazon Bedrock
+boto3>=1.39                # Bedrock API keys (AWS_BEARER_TOKEN_BEDROCK)
 
 # Notebook conveniences
 pandas>=2.0
@@ -14,3 +21,4 @@ python-dotenv>=1.0
 tqdm
 jinja2
 matplotlib   # for DataFrame.style gradients
+nest_asyncio  # concurrent evals/experiments inside notebooks
